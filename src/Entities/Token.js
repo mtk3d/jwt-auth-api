@@ -1,4 +1,4 @@
-import localStorage from 'local-storage';
+import localStorage from 'localStorage';
 import jwtDecode from 'jwt-decode';
 
 export default class Token {
@@ -6,6 +6,7 @@ export default class Token {
     this.refreshUrl = refreshUrl;
     this.decodedToken = null
     this.tokenExp = 0;
+    this.tokenIat = 0;
     this.refreshTTL = refreshTTL;
     this.init();
   }
@@ -17,7 +18,7 @@ export default class Token {
   }
 
   getToken() {
-    return localStorage.get('Authorization');
+    return localStorage.getItem('Authorization');
   }
 
   setToken(token) {
@@ -25,14 +26,16 @@ export default class Token {
       throw new Error('There is no token');
     }
     const normalizedToken = token.replace('Bearer ', '');
-    localStorage.set('Authorization', normalizedToken);
+    localStorage.setItem('Authorization', normalizedToken);
     this.decodedToken = jwtDecode(normalizedToken);
     this.tokenExp = this.decodedToken.exp;
+    this.tokenIat = this.decodedToken.iat;
   }
 
   removeToken() {
     this.decodedToken = null;
     this.tokenExp = null;
+    this.tokenIat = null;
   }
 
   getDecodedToken() {
@@ -46,7 +49,7 @@ export default class Token {
 
   canRefresh() {
     const currentTimestamp = Date.now() / 1000;
-    return this.getToken() && this.tokenExp + this.refreshTTL > currentTimestamp;
+    return this.getToken() && this.tokenIat + this.refreshTTL > currentTimestamp;
   }
 
   shouldRefresh() {

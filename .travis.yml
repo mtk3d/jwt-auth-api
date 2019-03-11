@@ -23,5 +23,5 @@ notifications:
   email:
     recipients:
       - mateusz@cholewka.com.pl
-    on_success: never # default: change
-    on_failure: always # default: always
+    on_success: never
+    on_failure: always

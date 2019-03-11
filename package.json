@@ -6,10 +6,22 @@
   "repository": "https://github.com/mtk3d/jwt-auth-api",
   "author": "Mateusz Cholewka",
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "axios": "^0.18.0",
-    "jest": "^24.4.0",
     "jwt-decode": "^2.2.0",
-    "local-storage": "^1.4.2"
+    "localStorage": "^1.0.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "babel-jest": "^24.4.0",
+    "jest": "^24.4.0",
+    "jest-localstorage-mock": "^2.4.0",
+    "mockdate": "^2.0.2"
   }
 }
