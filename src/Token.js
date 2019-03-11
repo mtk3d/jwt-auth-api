@@ -4,18 +4,26 @@ import jwtDecode from 'jwt-decode';
 export default class Token {
   constructor(refreshUrl, refreshTTL) {
     this.refreshUrl = refreshUrl;
-    this.token = null;
     this.decodedToken = null
     this.tokenExp = 0;
     this.refreshTTL = refreshTTL;
+    this.init();
+  }
+
+  init() {
+    if (this.getToken()) {
+      this.setToken(this.getToken());
+    }
   }
 
   getToken() {
-    const token = localStorage.get('Authorization');
-    return token ? token : null;
+    return localStorage.get('Authorization');
   }
 
   setToken(token) {
+    if (!token) {
+      throw new Error('There is no token');
+    }
     const normalizedToken = token.replace('Bearer ', '');
     localStorage.set('Authorization', normalizedToken);
     this.decodedToken = jwtDecode(normalizedToken);
@@ -23,7 +31,6 @@ export default class Token {
   }
 
   removeToken() {
-    this.token = null;
     this.decodedToken = null;
     this.tokenExp = null;
   }
@@ -39,7 +46,7 @@ export default class Token {
 
   canRefresh() {
     const currentTimestamp = Date.now() / 1000;
-    return this.token && this.tokenExp + this.refreshTTL > currentTimestamp;
+    return this.getToken() && this.tokenExp + this.refreshTTL > currentTimestamp;
   }
 
   shouldRefresh() {
@@ -48,10 +55,11 @@ export default class Token {
 
   refreshToken(axiosInstance) {
     return new Promise((resolve, reject) => {
-      axiosInstance.post(this.refreshUrl, { token: this.token })
+      axiosInstance.post(this.refreshUrl, { token: this.getToken() })
         .then(response => {
-          this.setToken(response.access_token);
-          resolve(response);
+          const token = response.data.access_token;
+          this.setToken(token);
+          resolve(token);
         })
         .catch(error => {
           reject(error);

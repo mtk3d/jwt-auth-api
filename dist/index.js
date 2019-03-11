@@ -9,18 +9,26 @@ var axios = _interopDefault(require('axios'));
 class Token {
   constructor(refreshUrl, refreshTTL) {
     this.refreshUrl = refreshUrl;
-    this.token = null;
     this.decodedToken = null;
     this.tokenExp = 0;
     this.refreshTTL = refreshTTL;
+    this.init();
+  }
+
+  init() {
+    if (this.getToken()) {
+      this.setToken(this.getToken());
+    }
   }
 
   getToken() {
-    const token = localStorage.get('Authorization');
-    return token ? token : null;
+    return localStorage.get('Authorization');
   }
 
   setToken(token) {
+    if (!token) {
+      throw new Error('There is no token');
+    }
     const normalizedToken = token.replace('Bearer ', '');
     localStorage.set('Authorization', normalizedToken);
     this.decodedToken = jwtDecode(normalizedToken);
@@ -28,7 +36,6 @@ class Token {
   }
 
   removeToken() {
-    this.token = null;
     this.decodedToken = null;
     this.tokenExp = null;
   }
@@ -44,7 +51,7 @@ class Token {
 
   canRefresh() {
     const currentTimestamp = Date.now() / 1000;
-    return this.token && this.tokenExp + this.refreshTTL > currentTimestamp;
+    return this.getToken() && this.tokenExp + this.refreshTTL > currentTimestamp;
   }
 
   shouldRefresh() {
@@ -53,10 +60,11 @@ class Token {
 
   refreshToken(axiosInstance) {
     return new Promise((resolve, reject) => {
-      axiosInstance.post(this.refreshUrl, { token: this.token })
+      axiosInstance.post(this.refreshUrl, { token: this.getToken() })
         .then(response => {
-          this.setToken(response.access_token);
-          resolve(response);
+          const token = response.data.access_token;
+          this.setToken(token);
+          resolve(token);
         })
         .catch(error => {
           reject(error);
@@ -66,62 +74,45 @@ class Token {
 }
 
 class Api {
-  constructor(token) {
+  constructor(config, token) {
     this.token = token;
+    this.config = config;
     this.axiosInstance = axios.create(this.config);
     this._addAxiosTokenInterceptor();
     this.refreshingToken = Promise.resolve();
+    this.tokenIsRefreshing = false;
   }
 
-  token() {
-    return this.token;
-  }
+  _checkToken() {
+    if (this.token.shouldRefresh() && !this.tokenIsRefreshing) {
+      this.tokenIsRefreshing = true;
 
-  axios() {
-    return this.axiosInstance;
-  }
-
-  get(url, config = null) {
-    return this._dispatch('get', url, config);
-  }
-
-  delete(url, config = null) {
-    return this._dispatch('delete', url, config);
-  }
-
-  options(url, config = null) {
-    return this._dispatch('options', url, config);
-  }
-
-  head(url, config = null) {
-    return this._dispatch('head', url, config);
-  }
-
-  post(url, data = null, config = null) {
-    return this._dispatch('post', url, config, data);
-  }
-
-  put(url, data = null, config = null) {
-    return this._dispatch('put', url, config, data);
-  }
-
-  patch(url, data = null, config = null) {
-    return this._dispatch('patch', url, config, data);
-  }
-
-  checkToken() {
-    if (this.token.shouldRefresh()) {
       this.refreshingToken = this.token.refreshToken(this.axiosInstance);
+
+      this.refreshingToken
+        .then(() => {
+          this.tokenIsRefreshing = false;
+        });
     }
   }
 
-  _dispatch(method, url, config, data = null) {
-    this.checkToken();
+  dispatch(method, url, config, data = null) {
+    this._checkToken();
 
     return new Promise((resolve, reject) => {
       this.refreshingToken
-        .then(() => {
-          this._requestResolve(method, url, config, data)
+        .then(token => {
+          const newConfig = config;
+          if (token) {
+            if (newConfig.headers) {
+              newConfig.headers.Authorization = token;
+            } else {
+              newConfig.headers = {
+                Authorization: token
+              };
+            }
+          }
+          this._requestResolve(method, url, newConfig, data)
             .then(response => {
               resolve(response);
             })
@@ -141,7 +132,7 @@ class Api {
     } else if (noDataMethods.includes(method)) {
       return this.axiosInstance[method](url, config);
     } else {
-      throw new Exception('Invalid method');
+      throw new Error('Invalid method');
     }
   }
   
@@ -151,16 +142,54 @@ class Api {
         const newConfig = config;
         const token = this.token.getToken();
         if (token && !this.token.isExpired()) {
-          newConfig.headers.Authorization = token;
+          newConfig.headers.Authorization = `Bearer ${token}`;
         }
         return newConfig;
       });
   }
 }
 
-var main = (refreshUrl, refreshTTL = 0) => {
-  const token = new Token(refreshUrl, refreshTTL);
-  return new Api(token);
-};
+class JWTApiAuth {
+  constructor(config, refreshUrl, refreshTTL) {
+    this.token = new Token(refreshUrl, refreshTTL);
+    this.api = new Api(config, this.token);
+  }
 
-module.exports = main;
+  token() {
+    return this.token;
+  }
+
+  axios() {
+    return this.api.axiosInstance;
+  }
+
+  get(url, config = {}) {
+    return this.api.dispatch('get', url, config);
+  }
+
+  delete(url, config = {}) {
+    return this.api.dispatch('delete', url, config);
+  }
+
+  options(url, config = {}) {
+    return this.api.dispatch('options', url, config);
+  }
+
+  head(url, config = {}) {
+    return this.api.dispatch('head', url, config);
+  }
+
+  post(url, data = {}, config = {}) {
+    return this.api.dispatch('post', url, config, data);
+  }
+
+  put(url, data = {}, config = {}) {
+    return this.api.dispatch('put', url, config, data);
+  }
+
+  patch(url, data = {}, config = {}) {
+    return this.api.dispatch('patch', url, config, data);
+  }
+}
+
+module.exports = JWTApiAuth;

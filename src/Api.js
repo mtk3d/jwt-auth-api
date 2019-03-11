@@ -1,62 +1,45 @@
 import axios from 'axios';
 
 export default class Api {
-  constructor(token) {
+  constructor(config, token) {
     this.token = token;
+    this.config = config;
     this.axiosInstance = axios.create(this.config);
     this._addAxiosTokenInterceptor();
     this.refreshingToken = Promise.resolve();
+    this.tokenIsRefreshing = false;
   }
 
-  token() {
-    return this.token;
-  }
+  _checkToken() {
+    if (this.token.shouldRefresh() && !this.tokenIsRefreshing) {
+      this.tokenIsRefreshing = true;
 
-  axios() {
-    return this.axiosInstance;
-  }
-
-  get(url, config = null) {
-    return this._dispatch('get', url, config);
-  }
-
-  delete(url, config = null) {
-    return this._dispatch('delete', url, config);
-  }
-
-  options(url, config = null) {
-    return this._dispatch('options', url, config);
-  }
-
-  head(url, config = null) {
-    return this._dispatch('head', url, config);
-  }
-
-  post(url, data = null, config = null) {
-    return this._dispatch('post', url, config, data);
-  }
-
-  put(url, data = null, config = null) {
-    return this._dispatch('put', url, config, data);
-  }
-
-  patch(url, data = null, config = null) {
-    return this._dispatch('patch', url, config, data);
-  }
-
-  checkToken() {
-    if (this.token.shouldRefresh()) {
       this.refreshingToken = this.token.refreshToken(this.axiosInstance);
+
+      this.refreshingToken
+        .then(() => {
+          this.tokenIsRefreshing = false;
+        });
     }
   }
 
-  _dispatch(method, url, config, data = null) {
-    this.checkToken();
+  dispatch(method, url, config, data = null) {
+    this._checkToken();
 
     return new Promise((resolve, reject) => {
       this.refreshingToken
-        .then(() => {
-          this._requestResolve(method, url, config, data)
+        .then(token => {
+          const newConfig = config;
+          if (token) {
+            if (newConfig.headers) {
+              newConfig.headers.Authorization = token;
+            } else {
+              newConfig.headers = {
+                Authorization: token
+              };
+            }
+          }
+          this._requestResolve(method, url, newConfig, data)
             .then(response => {
               resolve(response);
             })
@@ -76,7 +59,7 @@ export default class Api {
     } else if (noDataMethods.includes(method)) {
       return this.axiosInstance[method](url, config);
     } else {
-      throw new Exception('Invalid method');
+      throw new Error('Invalid method');
     }
   }
   
@@ -86,7 +69,7 @@ export default class Api {
         const newConfig = config;
         const token = this.token.getToken();
         if (token && !this.token.isExpired()) {
-          newConfig.headers.Authorization = token;
+          newConfig.headers.Authorization = `Bearer ${token}`;
         }
         return newConfig;
       })
