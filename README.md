@@ -5,6 +5,15 @@ It's works fine with [tymondesigns/jwt-auth](https://github.com/tymondesigns/jwt
 
 This library, just pause all requests if token is not alive, and refresh it if RefreshTTL is not expired.
 
+## Installation
+``` bash
+$ npm install jwt-auth-api
+
+# or
+
+$ yarn add jwt-auth-api
+```
+
 ## Creating JWTAuthApi object
 ``` JS
 new JWTAuthApi(object: axiosConfig, string: refreshUrl, int: refreshTTL);
@@ -15,7 +24,7 @@ new JWTAuthApi(object: axiosConfig, string: refreshUrl, int: refreshTTL);
 
 ## Configure
 Create api.js file:
-``` JS
+``` js
 import JWTAuthApi from 'jwt-auth-api';
 
 const axiosConfig = {
@@ -39,7 +48,7 @@ export const JWTToken = api.token;
 ```
 ## Example usage
 Fetch something from api:
-``` JS
+``` js
 import api from './api.js';
 
 api.get('/api/user/me')
@@ -48,7 +57,7 @@ api.get('/api/user/me')
   });
 ```
 Set token from login:
-``` JS
+``` js
 import api from './api.js';
 import { JWTToken } from './api.js';
 
@@ -62,7 +71,7 @@ api.post('/api/auth/login', {
 ```
 
 ## Refresh token endpoint schema
-``` JS
+``` js
 {
   // `access_token` is the JWT access token
   "access_token": "eyJ0eXAiOiJKV1QiLCJ...",
