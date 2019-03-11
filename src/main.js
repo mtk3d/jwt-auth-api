@@ -1,7 +1,7 @@
 import Token from './Entities/Token';
 import Api from './Entities/Api';
 
-export default class JWTApiAuth {
+export default class JWTAuthApi {
   constructor(config, refreshUrl, refreshTTL) {
     this.token = new Token(refreshUrl, refreshTTL);
     this.api = new Api(config, this.token);
