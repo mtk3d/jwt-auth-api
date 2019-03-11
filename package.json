@@ -8,6 +8,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
+    "jest": "^24.4.0",
     "jwt-decode": "^2.2.0",
     "local-storage": "^1.4.2"
   }

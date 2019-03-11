@@ -1,0 +1,29 @@
+language: node_js
+node_js:
+  - "node"
+  - "8"
+  - "7"
+
+before_script:
+  - npm install -g rollup
+install:
+  - npm install
+script:
+  - npm run test
+  - rollup -c
+
+deploy:
+  provider: npm
+  email: mateusz@cholewka.com.pl
+  api_key:
+    secure: mut5RnKCO3NT2cYXwa1h3XxZJHsaNtxPrYTEM9b64drCV9jo2UdO+6ossAICcG99U6mzoaFGqL5OQA31JIwMyKw/PiDL9AE3Ry5saT7Ej7+8BUrar+T5P4wEV8R1mM723Bh8WY3689g1k4c87TB/GGw8yhSvufxhkrUzwrPiIlLzgqCsBpSN6XCw8jGhuudR2upDrYd5h/NCEC1ldD5lf3ExrPFfNR5xUYQpxw+NNVN+SYy4Id7C9XT67fn7lIzs9ajgIOUeCGopBlDqAzrmxoAslHDJfYAGV5Fkuw7Bc6BKlW9asG4dS8ydmOLEHf02RHQh03PQF+KdkpXPbl+odZ7vV0gfH3gbUCXDo8BcU7k+raEvcHjaoBWnCsnQrN0dQjmKzm6lfAXVJxaTH24R27fJyhSKSG3xq7If5dyIoqkE9Q8Ma6OMoI8ghie6y/MiQp4WKzmnHYgbtKS7j61ZnjzrAa37vqB2lgUC5/EmXjXtQ9oueIHgnFfUwvf4Rib23ydbvATDbnTxrgh5pYD9fpnmPsgm8NIeyxCJmDalKvuw74TxurxHF+wZdNvhcs9Rb+QLC9lvoP7hKOCgiEPigQHzLaqmiVJYvHgkKCQtUCjz8+sM2xTEa6n65ptzrA7KGxmGWSo56c0ebKtabdhZ6flC4SA1dhFS8ahuPaGn5aI=
+  on:
+    tags: true
+    repo: mtk3d/jwt-auth-api
+
+notifications:
+  email:
+    recipients:
+      - mateusz@cholewka.com.pl
+    on_success: never # default: change
+    on_failure: always # default: always

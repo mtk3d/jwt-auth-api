@@ -1,5 +1,5 @@
-import Token from './Token';
-import Api from './Api';
+import Token from './Entities/Token';
+import Api from './Entities/Api';
 
 export default class JWTApiAuth {
   constructor(config, refreshUrl, refreshTTL) {
