@@ -5,5 +5,10 @@
   "main": "index.js",
   "repository": "https://github.com/mtk3d/jwt-auth-api",
   "author": "Mateusz Cholewka",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "jwt-decode": "^2.2.0",
+    "local-storage": "^1.4.2"
+  }
 }
