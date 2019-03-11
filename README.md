@@ -1,4 +1,5 @@
 # JWT Auth API
+[![Build Status](https://travis-ci.org/mtk3d/jwt-auth-api.svg?branch=master)](https://travis-ci.org/mtk3d/jwt-auth-api)
 
 JS Axios based api library for managing JWT token authorization and refreshing.  
 It's works fine with [tymondesigns/jwt-auth](https://github.com/tymondesigns/jwt-auth)
