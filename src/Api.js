@@ -1,71 +1,6 @@
-'use strict';
+import axios from 'axios';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var localStorage = _interopDefault(require('local-storage'));
-var jwtDecode = _interopDefault(require('jwt-decode'));
-var axios = _interopDefault(require('axios'));
-
-class Token {
-  constructor(refreshUrl, refreshTTL) {
-    this.refreshUrl = refreshUrl;
-    this.token = null;
-    this.decodedToken = null;
-    this.tokenExp = 0;
-    this.refreshTTL = refreshTTL;
-  }
-
-  getToken() {
-    const token = localStorage.get('Authorization');
-    return token ? token : null;
-  }
-
-  setToken(token) {
-    const normalizedToken = token.replace('Bearer ', '');
-    localStorage.set('Authorization', normalizedToken);
-    this.decodedToken = jwtDecode(normalizedToken);
-    this.tokenExp = this.decodedToken.exp;
-  }
-
-  removeToken() {
-    this.token = null;
-    this.decodedToken = null;
-    this.tokenExp = null;
-  }
-
-  getDecodedToken() {
-    return this.decodedToken;
-  }
-
-  isExpired() {
-    const currentTimestamp = Date.now() / 1000;
-    return this.tokenExp < currentTimestamp;
-  }
-
-  canRefresh() {
-    const currentTimestamp = Date.now() / 1000;
-    return this.token && this.tokenExp + this.refreshTTL > currentTimestamp;
-  }
-
-  shouldRefresh() {
-    return this.isExpired() && this.canRefresh();
-  }
-
-  refreshToken(axiosInstance) {
-    return new Promise((resolve, reject) => {
-      axiosInstance.post(this.refreshUrl, { token: this.token })
-        .then(response => {
-          this.setToken(response.access_token);
-          resolve(response);
-        })
-        .catch(error => {
-          reject(error);
-        });
-    })
-  }
-}
-
-class Api {
+export default class Api {
   constructor(token) {
     this.token = token;
     this.axiosInstance = axios.create(this.config);
@@ -127,8 +62,8 @@ class Api {
             })
             .catch(error => {
               reject(error);
-            });
-        });
+            })
+        })
     })
   }
 
@@ -154,13 +89,6 @@ class Api {
           newConfig.headers.Authorization = token;
         }
         return newConfig;
-      });
+      })
   }
 }
-
-var main = (refreshUrl, refreshTTL = 0) => {
-  const token = new Token(refreshUrl, refreshTTL);
-  return new Api(token);
-};
-
-module.exports = main;
