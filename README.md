@@ -62,7 +62,7 @@ api.post('/api/auth/login', {
 ```
 
 ## Refresh token endpoint schema
-``` JSON
+``` JS
 {
   // `access_token` is the JWT access token
   "access_token": "eyJ0eXAiOiJKV1QiLCJ...",
