@@ -2,7 +2,7 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var localStorage = _interopDefault(require('local-storage'));
+var localStorage = _interopDefault(require('localStorage'));
 var jwtDecode = _interopDefault(require('jwt-decode'));
 var axios = _interopDefault(require('axios'));
 
@@ -11,6 +11,7 @@ class Token {
     this.refreshUrl = refreshUrl;
     this.decodedToken = null;
     this.tokenExp = 0;
+    this.tokenIat = 0;
     this.refreshTTL = refreshTTL;
     this.init();
   }
@@ -22,7 +23,7 @@ class Token {
   }
 
   getToken() {
-    return localStorage.get('Authorization');
+    return localStorage.getItem('Authorization');
   }
 
   setToken(token) {
@@ -30,14 +31,16 @@ class Token {
       throw new Error('There is no token');
     }
     const normalizedToken = token.replace('Bearer ', '');
-    localStorage.set('Authorization', normalizedToken);
+    localStorage.setItem('Authorization', normalizedToken);
     this.decodedToken = jwtDecode(normalizedToken);
     this.tokenExp = this.decodedToken.exp;
+    this.tokenIat = this.decodedToken.iat;
   }
 
   removeToken() {
     this.decodedToken = null;
     this.tokenExp = null;
+    this.tokenIat = null;
   }
 
   getDecodedToken() {
@@ -51,7 +54,7 @@ class Token {
 
   canRefresh() {
     const currentTimestamp = Date.now() / 1000;
-    return this.getToken() && this.tokenExp + this.refreshTTL > currentTimestamp;
+    return this.getToken() && this.tokenIat + this.refreshTTL > currentTimestamp;
   }
 
   shouldRefresh() {
@@ -149,7 +152,7 @@ class Api {
   }
 }
 
-class JWTApiAuth {
+class JWTAuthApi {
   constructor(config, refreshUrl, refreshTTL) {
     this.token = new Token(refreshUrl, refreshTTL);
     this.api = new Api(config, this.token);
@@ -192,4 +195,4 @@ class JWTApiAuth {
   }
 }
 
-module.exports = JWTApiAuth;
+module.exports = JWTAuthApi;
