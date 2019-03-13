@@ -87,14 +87,16 @@ describe('Token', () => {
 
     const response = {
       data: {
-        access_token: exampleRefreshedToken,
-        expires_in: 200,
-        token_type: "bearer"
-      },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {},
+        data: {
+          access_token: exampleRefreshedToken,
+          expires_in: 200,
+          token_type: "bearer"
+        },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {},
+      }
     };
 
     axios.post = jest.fn(() => Promise.resolve(response));
