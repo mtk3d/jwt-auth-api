@@ -75,15 +75,16 @@ api.post('/api/auth/login', {
 ## Refresh token endpoint schema
 ``` js
 {
-  // `access_token` is the JWT access token
-  "access_token": "eyJ0eXAiOiJKV1QiLCJ...",
+  "data": {
+    // `access_token` is the JWT access token
+    "access_token": "eyJ0eXAiOiJKV1QiLCJ...",
 
-  // `expires_in` is not required, but can be in the feature
-  "expires_in": 3600,
+    // `expires_in` is not required, but can be in the feature
+    "expires_in": 3600,
 
-  // `token_type` is not required, but can be in the feature
-  "token_type": "bearer",
-  
+    // `token_type` is not required, but can be in the feature
+    "token_type": "bearer",
+  }
 }
 ```
 ## Requests methods
