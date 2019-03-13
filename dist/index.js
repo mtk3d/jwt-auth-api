@@ -68,7 +68,7 @@ class Token {
     return new Promise((resolve, reject) => {
       axiosInstance.post(this.refreshUrl, { token: this.getToken() })
         .then(response => {
-          const token = response.data.access_token;
+          const token = response.data.data.access_token;
           this.setToken(token);
           resolve(token);
         })
