@@ -27,8 +27,10 @@ class Token {
   }
 
   setToken(token) {
-    if (!token) {
-      throw new Error('There is no token');
+    if (typeof token !== 'string') {
+      this.removeToken();
+      console.error('Wrong token');
+      return;
     }
     const normalizedToken = token.replace('Bearer ', '');
     localStorage.setItem('Authorization', normalizedToken);
@@ -38,6 +40,7 @@ class Token {
   }
 
   removeToken() {
+    localStorage.removeItem('Authorization');
     this.decodedToken = null;
     this.tokenExp = null;
     this.tokenIat = null;
@@ -70,6 +73,7 @@ class Token {
           resolve(token);
         })
         .catch(error => {
+          this.removeToken();
           reject(error);
         });
     })

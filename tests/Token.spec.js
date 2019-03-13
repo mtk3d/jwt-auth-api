@@ -34,6 +34,17 @@ describe('Token', () => {
     expect(token.tokenExp).toBe(fakeCurrentTimestampS + 200);
   });
 
+  test('set undefined token', () => {
+    MockDate.set(fakeCurrentTimestampS * 1000);
+    console.error = jest.fn();
+
+    token.setToken(undefined);
+
+    expect(console.error).toBeCalled();
+    expect(token.getToken()).toBe(null);
+    expect(token.tokenExp).toBe(null);
+  });
+
   test('is alive', () => {
     MockDate.set(fakeCurrentTimestampS * 1000);
 
