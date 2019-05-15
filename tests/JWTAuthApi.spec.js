@@ -4,7 +4,7 @@ let api = null;
 
 describe('JWTAuthApi', () => {
   beforeEach(() => {
-    api = new JWTAuthApi({}, '/refresh');
+    // api = new JWTAuthApi({}, '/refresh');
   });
 
   test('token', () => {
