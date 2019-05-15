@@ -1,6 +1,7 @@
 import Token from '../src/Entities/Token';
 import MockDate from 'mockdate';
 import axios from 'axios';
+import cookies from 'browser-cookies';
 
 const fakeCurrentTimestampS = 1000000000;
 const exampleToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxMDAwMDAwMDAwLCJleHAiOjEwMDAwMDAyMDB9.sRMrdJdK4FUGlPg4Ft1z9VJVj_t3OWoYfD38RocWROU";
@@ -16,6 +17,7 @@ const exampleRefreshedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIw
 let token = null;
 
 jest.mock('axios');
+jest.mock('browser-cookies', () => {});
 
 describe('Token', () => {
   beforeEach(() => {
