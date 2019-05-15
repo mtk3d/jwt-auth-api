@@ -34,7 +34,7 @@ export default class Token {
     this.tokenExp = this.decodedToken.exp;
     this.tokenIat = this.decodedToken.iat;
     cookies.set('Authorization', normalizedToken, {
-      expires: new Date(this.tokenExp * 1000),
+      expires: new Date((this.tokenExp + this.refreshTTL) * 1000),
       secure: this.secureProtocol
     });
   }
